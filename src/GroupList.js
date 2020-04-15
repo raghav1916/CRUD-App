@@ -4,12 +4,15 @@ import AppNavbar from "./AppNavbar";
 import { Link, useParams } from "react-router-dom";
 //import users from "./users";
 import axios from "axios";
+import Popup from "reactjs-popup";
+import GroupEdit from "./GroupEdit";
 
 class GroupList extends Component {
   constructor(props) {
     super(props);
     this.state = { groups: [], isLoading: true };
     //this.remove = this.remove.bind(this);
+  
   }
 
   componentDidMount() {
@@ -70,20 +73,22 @@ class GroupList extends Component {
           </td>
           <td>
             <ButtonGroup>
-              <Button
-                size="sm"
-                color="primary"
-                tag={Link}
-                to={"/groups/" + group.id}
+              <Popup
+                modal
+                trigger={
+                  <Button size="sm" color="primary">
+                    Edit
+                  </Button>
+                }
               >
-                Edit
-              </Button>
+                <GroupEdit id={group.id} />
+              </Popup>
               <Button
                 size="sm"
                 color="danger"
                 onClick={() => this.remove(group.id)}
               >
-                > Delete
+                Delete
               </Button>
             </ButtonGroup>
           </td>
@@ -95,9 +100,19 @@ class GroupList extends Component {
         <AppNavbar />
         <Container fluid>
           <div className="float-right">
-            <Button color="success" tag={Link} to="/groups/new">
-              Add Group
-            </Button>
+            <Popup
+              modal
+              trigger={
+                <Button
+                  size="success"
+                  color="primary"
+                >
+                  Add Group
+                </Button>
+              }
+            >
+              <GroupEdit />
+            </Popup>
           </div>
           <h3>My JUG Tour</h3>
           <Table className="mt-4">
