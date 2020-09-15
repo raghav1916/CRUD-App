@@ -5,7 +5,6 @@ import Home from "./Home";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import GroupList from "./GroupList";
 import GroupEdit from "./GroupEdit";
-import Edit from "./Edit";
 
 class App extends Component {
   //constructor(props) {
@@ -40,9 +39,7 @@ class App extends Component {
         <Switch>
           <Route path="/" exact={true} component={Home} />
           <Route path="/groups" exact={true} component={GroupList} />
-          <Route path="/groups/new" exact={true} component={GroupEdit} />
-          <Route path="/groups/:id" exact={true} component={GroupEdit} />
-
+          <Route path="/groups" exact={true} component={GroupEdit} />
         </Switch>
       </Router>
     );

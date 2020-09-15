@@ -1,40 +1,73 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
-import { Button, Container, Form, FormGroup, Input, Label } from "reactstrap";
-import AppNavbar from "./AppNavbar";
+import {
+  CountryDropdown,
+  RegionDropdown,
+  CountryRegionData,
+} from "react-country-region-selector";
+import {
+  Button,
+  Container,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Modal,
+} from "reactstrap";
+//import AppNavbar from "./AppNavbar";
 import Axios from "axios";
+import Popup from "reactjs-popup";
+import ReactDOM from "react-dom";
+import GroupList from "./GroupList";
 
 class GroupEdit extends Component {
-  emptyItem = {
-    name: "",
-    address: "",
-    city: "",
-    stateOrProvince: "",
-    country: "",
-    postalCode: "",
-  };
+  // emptyItem = {
+  //   name: "",
+  //   address: "",
+  //   city: "",
+  //   stateOrProvince: "",
+  //   country: "",
+  //   postalCode: "",
+  // };
   constructor(props) {
     super(props);
     this.state = {
-      item: this.emptyItem,
+      id: 0,
       name: "",
       address: "",
       city: "",
       stateOrProvince: "",
       country: "",
       postalCode: "",
+      isOpen: true,
     };
     //this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async componentDidMount() {
-    if (this.props.match.params.id !== "new") {
-      const url = `https://damp-dawn-51391.herokuapp.com/api/group/${this.props.match.params.id}`;
-      console.log(this.props.match.params.id);
+    //console.log(this.state.edit);
+    if (this.props.id) {
+      const url = `https://damp-dawn-51391.herokuapp.com/api/group/${this.props.id}`;
+      //console.log(this.props.match.params.id);
       const fetchData = await Axios.get(url);
-      this.setState({ item: fetchData.data });
+      this.setState({ id: fetchData.data.id });
+      this.setState({ name: fetchData.data.name });
+      this.setState({ address: fetchData.data.address });
+      this.setState({ city: fetchData.data.city });
+      this.setState({ stateOrProvince: fetchData.data.stateOrProvince });
+      this.setState({ country: fetchData.data.country });
+      this.setState({ postalCode: fetchData.data.postalCode });
+      // console.log(this.state.item);
+      // this.forceUpdate();
     }
+  }
+  selectCountry(val) {
+    this.setState({ country: val });
+  }
+
+  selectCity(val) {
+    this.setState({ city: val });
   }
 
   // handleChange(event) {
@@ -50,7 +83,7 @@ class GroupEdit extends Component {
     event.preventDefault();
     //const { item } = this.state;
     var payload = {
-      id: this.props.match.params.id,
+      id: this.props.id,
       name: this.state.name,
       address: this.state.address,
       city: this.state.city,
@@ -60,38 +93,39 @@ class GroupEdit extends Component {
       user: this.state.user,
       events: this.state.events,
     };
-    if (this.props.match.params.id == "new") {
-    
+
+    if (this.props.id) {
+      await Axios.put(
+        `https://damp-dawn-51391.herokuapp.com/api/group/${this.props.id}`,
+        payload
+      ).then(function (response) {
+        console.log(response);
+      });
+      //this.props.history.push("/groups");
+    } else {
       await Axios.post(
         `https://damp-dawn-51391.herokuapp.com/api/group`,
         payload
       ).then(function (response) {
         console.log(response);
+        //this.setState({ item, isLoading: false });
+        //body: JSON.stringify(item),
       });
-      this.props.history.push("/groups");
+      //this.props.history.push("/groups");
+      // this.setState({ isOpen: false });
     }
-    
-      else{
-   await Axios.put(
-      `https://damp-dawn-51391.herokuapp.com/api/group/${this.props.match.params.id}`,
-      payload
-    ).then(function (response) {
-      console.log(response);
-      //this.setState({ item, isLoading: false });
-      //body: JSON.stringify(item),
-    });
-    this.props.history.push("/groups");
+    //ReactDOM.unmountComponentAtNode(Container);
+    window.location.reload();
   }
-}
-  
+  handleClose = () => {
+    window.location.reload();
+  };
 
   render() {
-    const { item } = this.state;
-    const title = <h2>{item.id ? "Edit Group" : "Add Group"}</h2>;
+    const title = <h2>{this.state.id ? "Edit Group" : "Add Group"}</h2>;
 
     return (
       <div>
-        <AppNavbar />
         <Container>
           {title}
           <Form onSubmit={this.handleSubmit}>
@@ -102,7 +136,7 @@ class GroupEdit extends Component {
                 name="name"
                 id="name"
                 onChange={(e) => this.setState({ name: e.target.value })}
-                defaultValue={this.state.item.name || ""}
+                value={this.state.name || ""}
                 autoComplete="name"
               />
             </FormGroup>
@@ -113,7 +147,7 @@ class GroupEdit extends Component {
                 name="address"
                 id="address"
                 onChange={(e) => this.setState({ address: e.target.value })}
-                defalutValue={this.state.item.address || ""}
+                value={this.state.address}
                 autoComplete="address-level1"
               />
             </FormGroup>
@@ -124,7 +158,7 @@ class GroupEdit extends Component {
                 name="city"
                 id="city"
                 onChange={(e) => this.setState({ city: e.target.value })}
-                defaultValue={this.state.item.city || ""}
+                value={this.state.city || ""}
                 autoComplete="address-level1"
               />
             </FormGroup>
@@ -133,12 +167,10 @@ class GroupEdit extends Component {
                 <Label for="stateOrProvince">State/Province</Label>
                 <Input
                   type="text"
-                  name="stateOrProvince"
-                  id="stateOrProvince"
-                  onChange={(e) =>
-                    this.setState({ stateOrProvince: e.target.value })
-                  }
-                  defaultValue={this.state.item.stateOrProvince || ""}
+                  name="country"
+                  id="country"
+                  onChange={(e) => this.setState({ country: e.target.value })}
+                  value={this.state.country || ""}
                   autoComplete="address-level1"
                 />
               </FormGroup>
@@ -146,10 +178,12 @@ class GroupEdit extends Component {
                 <Label for="country">Country</Label>
                 <Input
                   type="text"
-                  name="country"
-                  id="country"
-                  onChange={(e) => this.setState({ country: e.target.value })}
-                  defaultValue={this.state.item.country || ""}
+                  name="stateOrProvince"
+                  id="stateOrProvince"
+                  onChange={(e) =>
+                    this.setState({ stateOrProvince: e.target.value })
+                  }
+                  value={this.state.stateOrProvince || ""}
                   autoComplete="address-level1"
                 />
               </FormGroup>
@@ -162,7 +196,7 @@ class GroupEdit extends Component {
                   onChange={(e) =>
                     this.setState({ postalCode: e.target.value })
                   }
-                  defaultValue={this.state.item.postalCode || ""}
+                  value={this.state.postalCode || ""}
                   autoComplete="address-level1"
                 />
               </FormGroup>
@@ -171,7 +205,7 @@ class GroupEdit extends Component {
               <Button color="primary" type="submit">
                 Save
               </Button>{" "}
-              <Button color="secondary" tag={Link} to="/groups">
+              <Button color="secondary" onClick={this.handleClose}>
                 Cancel
               </Button>
             </FormGroup>
